@@ -526,10 +526,27 @@ async function analyzeLRForArticle() {
 }
 
 async function callAPI(system, prompt) {
+  // Clean prompt: replace newlines and special chars that break Make's JSON parsing
+  const cleanPrompt = prompt
+    .replace(/\r\n/g, ' ')
+    .replace(/\n/g, ' ')
+    .replace(/\r/g, ' ')
+    .replace(/\t/g, ' ')
+    .replace(/"/g, "'")
+    .replace(/\\/g, '');
+
+  const cleanSystem = system
+    .replace(/\r\n/g, ' ')
+    .replace(/\n/g, ' ')
+    .replace(/\r/g, ' ')
+    .replace(/\t/g, ' ')
+    .replace(/"/g, "'")
+    .replace(/\\/g, '');
+
   const response = await fetch(WEBHOOK_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ system, prompt })
+    body: JSON.stringify({ system: cleanSystem, prompt: cleanPrompt })
   });
   const text = await response.text();
   // Strip Make's wrapping {{ }} if present
