@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Igor Content Generator</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Georgia, serif; background: #f9f8f6; color: #1a1a1a; min-height: 100vh; }
+
+.header { background: #1a1a1a; color: #f9f8f6; padding: 1.25rem 2rem; display: flex; align-items: center; gap: 12px; }
+.header-title { font-size: 16px; font-weight: 500; letter-spacing: 0.02em; }
+.header-sub { font-size: 12px; color: #888; margin-top: 2px; }
+
+.container { max-width: 680px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+.step { display: none; }
+.step.active { display: block; }
+
+.step-label { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #999; margin-bottom: 6px; }
+.step-title { font-size: 22px; font-weight: 500; color: #1a1a1a; margin-bottom: 0.5rem; line-height: 1.3; }
+.step-sub { font-size: 14px; color: #666; margin-bottom: 1.5rem; line-height: 1.6; }
+
+.type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1.5rem; }
+.type-btn {
+  padding: 18px;
+  border: 1px solid #e0ddd8;
+  border-radius: 10px;
+  background: #fff;
+  color: #1a1a1a;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+  text-align: left;
+}
+.type-btn:hover { background: #f5f3ef; border-color: #ccc; }
+.type-btn .type-icon { font-size: 22px; margin-bottom: 10px; display: block; }
+.type-btn .type-name { font-weight: 500; display: block; margin-bottom: 4px; font-size: 15px; }
+.type-btn .type-desc { font-size: 12px; color: #888; line-height: 1.5; }
+
+.btn-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 1.5rem; }
+.btn {
+  padding: 10px 20px;
+  border: 1px solid #d0cdc8;
+  border-radius: 8px;
+  background: #fff;
+  color: #1a1a1a;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+.btn:hover { background: #f5f3ef; border-color: #aaa; }
+.btn.primary { background: #1a1a1a; color: #f9f8f6; border-color: #1a1a1a; }
+.btn.primary:hover { background: #333; }
+.btn.ghost { background: transparent; border-color: #d0cdc8; color: #666; font-size: 13px; }
+.btn.ghost:hover { background: #f5f3ef; }
+
+.topic-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 1.5rem; }
+.topic-btn {
+  padding: 12px 16px;
+  border: 1px solid #e0ddd8;
+  border-radius: 8px;
+  background: #fff;
+  color: #1a1a1a;
+  font-size: 13px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s;
+  font-family: inherit;
+  line-height: 1.5;
+}
+.topic-btn:hover { background: #f5f3ef; border-color: #ccc; }
+.topic-tag { font-size: 10px; color: #999; display: block; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.06em; }
+.topic-name { font-weight: 500; display: block; }
+.topic-desc { font-size: 12px; color: #888; margin-top: 2px; display: block; }
+
+.back-btn {
+  font-size: 12px; color: #999; cursor: pointer; border: none; background: none;
+  font-family: inherit; margin-bottom: 1.25rem; display: inline-flex; align-items: center; gap: 4px; padding: 0;
+}
+.back-btn:hover { color: #666; }
+
+.breadcrumb { font-size: 12px; color: #999; margin-bottom: 1rem; }
+.breadcrumb span { color: #444; font-weight: 500; }
+
+.output-area {
+  background: #fff;
+  border: 1px solid #e0ddd8;
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  min-height: 140px;
+  position: relative;
+}
+.output-text { font-size: 14px; line-height: 1.9; color: #1a1a1a; white-space: pre-wrap; font-family: inherit; }
+.output-text.loading { color: #999; font-style: italic; }
+
+.actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 1rem; }
+
+textarea {
+  width: 100%;
+  min-height: 160px;
+  padding: 14px;
+  border: 1px solid #d0cdc8;
+  border-radius: 8px;
+  background: #fff;
+  color: #1a1a1a;
+  font-size: 13px;
+  font-family: inherit;
+  line-height: 1.6;
+  resize: vertical;
+  margin-bottom: 1rem;
+}
+textarea:focus { outline: none; border-color: #888; }
+textarea::placeholder { color: #bbb; }
+
+.angle-item {
+  padding: 14px 16px;
+  border: 1px solid #e0ddd8;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  margin-bottom: 8px;
+  transition: all 0.15s;
+}
+.angle-item:hover { background: #f5f3ef; border-color: #ccc; }
+.angle-title { font-size: 14px; font-weight: 500; color: #1a1a1a; margin-bottom: 4px; }
+.angle-desc { font-size: 12px; color: #777; line-height: 1.5; }
+.angle-type { font-size: 11px; color: #aaa; margin-top: 4px; }
+
+.divider { height: 1px; background: #e8e5e0; margin: 2rem 0; }
+
+.spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid #ddd; border-top-color: #666; border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: middle; margin-right: 8px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.copy-success { color: #2d7a4f; font-size: 13px; margin-left: 8px; }
+
+@media (max-width: 500px) {
+  .type-grid { grid-template-columns: 1fr; }
+  .container { padding: 1.5rem 1rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="header-title">Igor Content Generator</div>
+    <div class="header-sub">TestFort · QA Ground and Grind</div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- STEP 1: Main type -->
+  <div class="step active" id="step1">
+    <div class="step-label">Старт</div>
+    <div class="step-title">Що генеруємо?</div>
+    <div class="step-sub">Вибери тип контенту для Ігоря Коваленка</div>
+    <div class="type-grid">
+      <button class="type-btn" onclick="selectMainType('post')">
+        <span class="type-icon">✏️</span>
+        <span class="type-name">LinkedIn пост</span>
+        <span class="type-desc">Hot take, poll, checklist, how-to або case з контент-плану</span>
+      </button>
+      <button class="type-btn" onclick="selectMainType('post_from_longread')">
+        <span class="type-icon">✂️</span>
+        <span class="type-name">Пост з лонгріду</span>
+        <span class="type-desc">Вставляєш статтю — отримуєш пост-ідеї і чернетку</span>
+      </button>
+      <button class="type-btn" onclick="selectMainType('article')">
+        <span class="type-icon">📄</span>
+        <span class="type-name">Стаття / розсилка</span>
+        <span class="type-desc">Outline або draft на тему з контент-плану</span>
+      </button>
+      <button class="type-btn" onclick="selectMainType('article_from_longread')">
+        <span class="type-icon">🔄</span>
+        <span class="type-name">Стаття з лонгріду</span>
+        <span class="type-desc">Переробляємо існуючий матеріал в нову статтю або розсилку</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- POST: Topic -->
+  <div class="step" id="stepPostTopic">
+    <button class="back-btn" onclick="showStep('step1')">← назад</button>
+    <div class="step-label">LinkedIn пост · крок 1 з 2</div>
+    <div class="step-title">Яка тема?</div>
+    <div class="topic-list" id="postTopicList"></div>
+  </div>
+
+  <!-- POST: Format -->
+  <div class="step" id="stepPostFormat">
+    <button class="back-btn" onclick="showStep('stepPostTopic')">← назад</button>
+    <div class="breadcrumb" id="bcPostFormat"></div>
+    <div class="step-label">LinkedIn пост · крок 2 з 2</div>
+    <div class="step-title">Який формат?</div>
+    <div class="btn-grid">
+      <button class="btn" onclick="selectFormat('hot_take')">Hot Take</button>
+      <button class="btn" onclick="selectFormat('poll')">Poll</button>
+      <button class="btn" onclick="selectFormat('checklist')">Checklist</button>
+      <button class="btn" onclick="selectFormat('howto')">How-to</button>
+      <button class="btn" onclick="selectFormat('case')">Case</button>
+    </div>
+  </div>
+
+  <!-- POST FROM LONGREAD: Paste -->
+  <div class="step" id="stepPostFromLR">
+    <button class="back-btn" onclick="showStep('step1')">← назад</button>
+    <div class="step-label">Пост з лонгріду · крок 1 з 3</div>
+    <div class="step-title">Вставте текст статті або розсилки</div>
+    <textarea id="lrTextForPost" placeholder="Вставте сюди текст лонгріду — статті, розсилки або будь-якого довгого матеріалу..."></textarea>
+    <div class="btn-grid">
+      <button class="btn primary" onclick="analyzeLRForPost()">Проаналізувати →</button>
+    </div>
+  </div>
+
+  <!-- POST FROM LONGREAD: Angles -->
+  <div class="step" id="stepPostLRAngles">
+    <button class="back-btn" onclick="showStep('stepPostFromLR')">← назад</button>
+    <div class="step-label">Пост з лонгріду · крок 2 з 3</div>
+    <div class="step-title">Вибери кут для поста</div>
+    <div id="lrPostAngles"></div>
+  </div>
+
+  <!-- ARTICLE: Topic -->
+  <div class="step" id="stepArticleTopic">
+    <button class="back-btn" onclick="showStep('step1')">← назад</button>
+    <div class="step-label">Стаття · крок 1 з 2</div>
+    <div class="step-title">Яка тема?</div>
+    <div class="topic-list" id="articleTopicList"></div>
+  </div>
+
+  <!-- ARTICLE: Output type -->
+  <div class="step" id="stepArticleType">
+    <button class="back-btn" onclick="showStep('stepArticleTopic')">← назад</button>
+    <div class="breadcrumb" id="bcArticleType"></div>
+    <div class="step-label">Стаття · крок 2 з 2</div>
+    <div class="step-title">Що генеруємо?</div>
+    <div class="btn-grid">
+      <button class="btn" onclick="selectArticleOutput('outline')">Outline статті</button>
+      <button class="btn" onclick="selectArticleOutput('newsletter')">Outline розсилки</button>
+      <button class="btn" onclick="selectArticleOutput('draft')">Повний draft</button>
+    </div>
+  </div>
+
+  <!-- ARTICLE FROM LONGREAD: Paste -->
+  <div class="step" id="stepArticleFromLR">
+    <button class="back-btn" onclick="showStep('step1')">← назад</button>
+    <div class="step-label">Стаття з лонгріду · крок 1 з 3</div>
+    <div class="step-title">Вставте текст лонгріду</div>
+    <textarea id="lrTextForArticle" placeholder="Вставте сюди текст існуючої статті або розсилки..."></textarea>
+    <div class="btn-grid">
+      <button class="btn primary" onclick="analyzeLRForArticle()">Проаналізувати →</button>
+    </div>
+  </div>
+
+  <!-- ARTICLE FROM LONGREAD: Angles -->
+  <div class="step" id="stepArticleLRAngles">
+    <button class="back-btn" onclick="showStep('stepArticleFromLR')">← назад</button>
+    <div class="step-label">Стаття з лонгріду · крок 2 з 3</div>
+    <div class="step-title">Що можна зробити з цього матеріалу?</div>
+    <div id="lrArticleAngles"></div>
+  </div>
+
+  <!-- OUTPUT -->
+  <div class="step" id="stepOutput">
+    <button class="back-btn" onclick="goBackFromOutput()">← назад</button>
+    <div class="breadcrumb" id="bcOutput"></div>
+    <div class="output-area">
+      <div class="output-text loading" id="outputText">
+        <span class="spinner"></span>Генерую...
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn primary" id="copyBtn" onclick="copyOutput()">Скопіювати</button>
+      <button class="btn ghost" onclick="regenerate()">Згенерувати ще раз</button>
+      <button class="btn ghost" onclick="showStep('step1')">Новий контент</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const WEBHOOK_URL = 'https://hook.eu1.make.com/3u433ea9zohwjcj2ag57vu1nd82ljutj';
+
+const state = {
+  mainType: null, topicKey: null, topicLabel: null,
+  format: null, articleOutput: null,
+  lrText: null, selectedAngle: null,
+  lastSystem: null, lastPrompt: null, backStep: null
+};
+
+const POST_TOPICS = [
+  { key: 'ai_accuracy', tag: 'AI Testing', name: 'Функціональна точність ≠ реальна якість', desc: 'AI проходить тести, але ламається у реальних юзерів' },
+  { key: 'ai_context', tag: 'AI Testing', name: 'Context awareness gaps', desc: 'AI відповідає на питання, але не тримає контекст розмови' },
+  { key: 'ai_drift', tag: 'AI Testing', name: 'Model drift', desc: 'Все працювало — а потім тихо перестало. Без єдиного бага' },
+  { key: 'ai_hallucinations', tag: 'AI Testing', name: 'Hallucinations — де шукати', desc: 'Вони не рандомні. Вони мають патерни' },
+  { key: 'ai_localization', tag: 'AI Testing', name: 'Локалізація AI features', desc: 'Протестували на English. Запустили в Німеччині. Проблеми' },
+  { key: 'ai_bias', tag: 'AI Testing', name: 'Bias у тренувальних даних', desc: 'Твій AI навчився від твоїх даних — і що він там знайшов' },
+  { key: 'ai_sales_copilot', tag: 'AI Testing', name: 'Sales copilot: зелені тести, реальні проблеми', desc: 'Все пройшло QA. А потім він почав вигадувати фічі' },
+  { key: 'devtools_update', tag: 'Dev Tools', name: 'Що ламається при major update', desc: 'Інтеграції, доки, stable flows, cross-platform, AI behavior' },
+  { key: 'devtools_inherited', tag: 'Dev Tools', name: 'Inherited automation debt', desc: 'Test suite від попередньої команди. Перше що ми робимо — не запускаємо' },
+  { key: 'devtools_ownership', tag: 'Dev Tools', name: 'Unclear test ownership', desc: 'Після handover — ніхто не знає що там і хто це рунив останній раз' },
+  { key: 'devtools_regression', tag: 'Dev Tools', name: 'Regression chaos', desc: 'Один апдейт ламає query syntax. Safety net немає' },
+  { key: 'devtools_integration', tag: 'Dev Tools', name: 'Integration testing — не одноразова подія', desc: 'Протестували інтеграцію. Шість місяців тому. До оновлення вендора' },
+  { key: 'consulting_startup', tag: 'Consulting', name: 'QA для стартапів', desc: '"Зробимо QA нормально коли буде більше ресурсів"' },
+  { key: 'consulting_process', tag: 'Consulting', name: 'Команда є, процесу нема', desc: 'Кожен тестує по-своєму. Перед релізом — лотерея' },
+  { key: 'consulting_drop', tag: 'Consulting', name: 'Якість впала — не розуміємо чому', desc: 'Клієнти знаходять баги раніше за QA. Команда вигоріла' },
+  { key: 'qa_automation', tag: 'Загальний QA', name: 'Automation — коли не варто', desc: 'Автоматизація заради coverage числа — коли краще не треба' },
+  { key: 'qa_codereview', tag: 'Загальний QA', name: 'Code review ≠ testing', desc: 'Дві різні речі які часто плутають' },
+  { key: 'qa_testdata', tag: 'Загальний QA', name: 'Test data management', desc: 'Ніхто не хоче цим займатись — і саме тому тести падають рандомно' },
+  { key: 'qa_support', tag: 'Загальний QA', name: 'Кращі баг-репорти — від support, не від QA', desc: 'Support бачить що реальні юзери роблять — QA не бачить' },
+];
+
+const ARTICLE_TOPICS = [
+  { key: 'art_ai_testing', tag: 'AI Testing', name: 'How to Test AI Applications: QA Framework', desc: 'Повний фреймворк від accuracy до drift monitoring' },
+  { key: 'art_ai_vs_regular', tag: 'AI Testing', name: 'Why AI Testing Is Not Software Testing', desc: 'Чому стандартний QA playbook не працює для AI' },
+  { key: 'art_business_cost', tag: 'AI Testing', name: 'The Business Cost of Skipping AI Testing', desc: 'Trust, churn, compliance — бізнес-наслідки' },
+  { key: 'art_audit_patterns', tag: 'AI Testing', name: 'AI Testing Patterns We See Across Every Audit', desc: 'Реальні знахідки з проектів' },
+  { key: 'art_devtools', tag: 'Dev Tools', name: "QA for Developer Tools: Why It's Different", desc: 'CI/CD, plugins, AI features, inherited test debt' },
+  { key: 'art_gdpr', tag: 'HR Tools', name: 'GDPR Testing for HR Platforms', desc: 'Що більшість команд пропускає при тестуванні видалення даних' },
+  { key: 'art_consulting', tag: 'Consulting', name: 'When Do Startups Actually Need QA?', desc: 'Top of funnel — відповідь до того як стартап готовий купити' },
+  { key: 'art_process', tag: 'Загальний QA', name: 'How QA Actually Works: From Sprint to Sign-Off', desc: 'Що відбувається між "потрібно QA" і "готово до шипінгу"' },
+  { key: 'art_support_qa', tag: 'Загальний QA', name: 'Why the Best Bug Reports Come from Support', desc: 'Support бачить що реальні юзери роблять — QA не бачить' },
+];
+
+const IGOR_SYSTEM = `You are writing content for Igor Kovalenko — a QA engineering lead with 10+ years of experience working with dev tool companies, SaaS products, and enterprise clients on QA strategy, audits, and automation.
+
+IGOR'S VOICE:
+- Thinks out loud, names uncomfortable truths without drama or fanfare
+- Uses specific details from real projects ("the test user's subscription expired", "20% CTR drop in three months")
+- Starts with something everyone says or does, shows where it breaks, then stops — no resolution, no inspiration
+- Dry irony without judgment. He observes, he does not teach
+- "We" for team work, first person singular for observations
+- Writes in English
+
+FOR ARTICLES AND NEWSLETTERS:
+- Opens with a specific real case or provocative statement — never with a definition
+- Section headings are conversational not corporate
+- Each section has a real example or case detail
+- Ends with practical next step or open question to readers
+- Single CTA at the end if needed
+
+NEVER:
+- Fortune cookie phrases
+- Triple repetition of same structure ("X is fine. Y is fine. Z is fine.")
+- Emoji as structural elements — only 🔴 ✅ ❓ in checklists
+- Marketing CTAs ("comment X and I'll send you...")
+- Overused phrases: "on paper", "at the end of the day", "game changer", "seamlessly", "best practices"
+- Explaining the obvious in two short sentences back to back
+- Starting with a question`;
+
+const FORMAT_PROMPTS = {
+  hot_take: t => `Write a LinkedIn hot take post for Igor about: "${t}"
+
+Opens with a statement that sounds like a widely accepted norm but has a catch. 3-5 short paragraphs, no bullet lists. One specific detail that makes it real (number, scenario, concrete moment). Ends with an observation, not advice or CTA. Use "—" for inline lists. 150-250 words.
+
+Aim for this tone: "87% accuracy sounds like a pass. And in most testing frameworks, it is... What breaks trust isn't usually failure. It's inconsistency: — Works great nine times — Confidently wrong on the tenth. That tenth interaction is the one people remember. And talk about."
+
+Output only the post text, nothing else.`,
+
+  poll: t => `Write a LinkedIn poll post for Igor about: "${t}"
+
+Structure: Line 1 = short hook question. Then 1-2 sentences of observation from practice. Then repeat the poll question. Then 4 options each on its own line starting with "—". CRITICAL: each option MUST be maximum 30 characters including spaces. Nothing after options.
+
+Reference: "How well do you actually know your AI feature's test coverage? We keep asking this at the start of every AI feature audit. The answers are all over the place — and it tends to predict how the first month in production goes. When you ship an AI feature, what does your test coverage look like? — Same as any feature — Dedicated AI testing — Monitored in production — Honestly not sure"
+
+Output only the post text, nothing else.`,
+
+  checklist: t => `Write a LinkedIn checklist post for Igor about: "${t}"
+
+Title: "[number] things that..." or "[number] signs that..." — specific. Each item: 🔴 + short name + one sentence where it hurts (not just a label). After each 🔴: practical note starting with "—" (max 1 sentence, what actually helps). Ending: dry observation — NOT "what would you add?". 5-6 items, 200-300 words. Only 🔴 ✅ ❓ as emoji, never thematic emoji.
+
+Output only the post text, nothing else.`,
+
+  howto: t => `Write a LinkedIn how-to post for Igor about: "${t}"
+
+Short opener from practice (one sentence, not a definition). Then either Option A: flowing prose with "—" for specific things to check, OR Option B: numbered steps in bold (Step 1 / Step 2 / Step 3) — pick what fits better. No "you should" or "make sure to". Ending limits scope, no CTA. No thematic emoji. 150-250 words.
+
+Output only the post text, nothing else.`,
+
+  case: t => `Write a LinkedIn case post for Igor about: "${t}"
+
+Either: situation → what we did → results → status. Or: key numbers first → context → what it meant for the team. "We" not "I". Client anonymous but situation specific. NEVER negative about the client — neutral context, factual findings. Numbers speak without commentary. Last line: status (still running / shipped / ongoing) or one dry observation. No CTA. Under 150 words.
+
+Output only the post text, nothing else.`
+};
+
+function buildTopicList(containerId, topics) {
+  const list = document.getElementById(containerId);
+  list.innerHTML = '';
+  topics.forEach(t => {
+    const btn = document.createElement('button');
+    btn.className = 'topic-btn';
+    btn.innerHTML = `<span class="topic-tag">${t.tag}</span><span class="topic-name">${t.name}</span><span class="topic-desc">${t.desc}</span>`;
+    btn.onclick = () => {
+      state.topicKey = t.key;
+      state.topicLabel = t.name;
+      if (containerId === 'postTopicList') {
+        document.getElementById('bcPostFormat').innerHTML = `Пост → <span>${t.name}</span>`;
+        showStep('stepPostFormat');
+      } else {
+        document.getElementById('bcArticleType').innerHTML = `Стаття → <span>${t.name}</span>`;
+        showStep('stepArticleType');
+      }
+    };
+    list.appendChild(btn);
+  });
+}
+
+function selectMainType(type) {
+  state.mainType = type;
+  if (type === 'post') { buildTopicList('postTopicList', POST_TOPICS); showStep('stepPostTopic'); }
+  else if (type === 'post_from_longread') { showStep('stepPostFromLR'); }
+  else if (type === 'article') { buildTopicList('articleTopicList', ARTICLE_TOPICS); showStep('stepArticleTopic'); }
+  else if (type === 'article_from_longread') { showStep('stepArticleFromLR'); }
+}
+
+function selectFormat(fmt) {
+  state.format = fmt;
+  const labels = { hot_take: 'Hot Take', poll: 'Poll', checklist: 'Checklist', howto: 'How-to', case: 'Case' };
+  document.getElementById('bcOutput').innerHTML = `Пост → ${state.topicLabel} → <span>${labels[fmt]}</span>`;
+  state.backStep = 'stepPostFormat';
+  state.lastSystem = IGOR_SYSTEM;
+  state.lastPrompt = FORMAT_PROMPTS[fmt](state.topicLabel);
+  showStep('stepOutput');
+  generate();
+}
+
+function selectArticleOutput(type) {
+  state.articleOutput = type;
+  const labels = { outline: 'Outline статті', newsletter: 'Outline розсилки', draft: 'Повний draft' };
+  document.getElementById('bcOutput').innerHTML = `Стаття → ${state.topicLabel} → <span>${labels[type]}</span>`;
+  state.backStep = 'stepArticleType';
+  state.lastSystem = IGOR_SYSTEM;
+  state.lastPrompt = buildArticlePrompt(state.topicLabel, type);
+  showStep('stepOutput');
+  generate();
+}
+
+function buildArticlePrompt(topic, type) {
+  const style = `Igor's article style: opens with a specific real case or surprising statement (never a definition); conversational section headings; each section has a real example or case detail; specific numbers and project examples; ends with practical next step or open question.`;
+  if (type === 'outline') return `Write a detailed article outline for Igor Kovalenko about: "${topic}". ${style} Deliver: title + intro hook description + 5-7 main sections each with conversational heading and 2-3 sentence description + conclusion approach. Target 1500-2500 words article. Output only the outline.`;
+  if (type === 'newsletter') return `Write a newsletter issue outline for Igor Kovalenko's QA Ground and Grind newsletter about: "${topic}". ${style} Include: subject line, preview text, opening hook, 3-4 sections, closing line. 600-800 words total. Output only the outline.`;
+  if (type === 'draft') return `Write a full article for Igor Kovalenko about: "${topic}". ${style} 1200-1800 words. Conversational subheadings. Include specific anonymized case details. End with practical takeaway or open question. Output only the article.`;
+}
+
+async function analyzeLRForPost() {
+  const text = document.getElementById('lrTextForPost').value.trim();
+  if (!text) return;
+  state.lrText = text;
+  const el = document.getElementById('lrPostAngles');
+  el.innerHTML = '<div style="color:#999;font-style:italic;font-size:13px;padding:8px 0"><span class="spinner"></span>Аналізую лонгрід...</div>';
+  showStep('stepPostLRAngles');
+
+  const prompt = `Read this article and suggest 5 LinkedIn post angles for Igor Kovalenko. For each: short title (max 8 words), one sentence on what the post would be about, and best format. Return ONLY valid JSON array, no markdown: [{"title":"...","desc":"...","format":"hot_take|poll|checklist|howto|case"},...]\n\nArticle:\n${text.slice(0, 3000)}`;
+
+  try {
+    const result = await callAPI(IGOR_SYSTEM, prompt);
+    let angles;
+    try { angles = JSON.parse(result.replace(/```json|```/g, '').trim()); } catch(e) { angles = []; }
+    el.innerHTML = '';
+    if (!angles.length) { el.innerHTML = '<div style="color:#999;font-size:13px">Не вдалось проаналізувати. Спробуйте ще раз.</div>'; return; }
+    const fmtLabels = { hot_take: 'Hot Take', poll: 'Poll', checklist: 'Checklist', howto: 'How-to', case: 'Case' };
+    angles.forEach(a => {
+      const div = document.createElement('div');
+      div.className = 'angle-item';
+      div.innerHTML = `<div class="angle-title">${a.title}</div><div class="angle-desc">${a.desc}</div><div class="angle-type">→ ${fmtLabels[a.format] || a.format}</div>`;
+      div.onclick = () => {
+        document.getElementById('bcOutput').innerHTML = `Пост з лонгріду → <span>${a.title}</span>`;
+        state.backStep = 'stepPostLRAngles';
+        state.lastSystem = IGOR_SYSTEM;
+        state.lastPrompt = `Based on this article, write a LinkedIn ${a.format} post for Igor Kovalenko with angle: "${a.title}" — ${a.desc}\n\n${FORMAT_PROMPTS[a.format](a.title)}\n\nSource article:\n${text.slice(0, 2000)}`;
+        showStep('stepOutput');
+        generate();
+      };
+      el.appendChild(div);
+    });
+  } catch(e) {
+    el.innerHTML = '<div style="color:#999;font-size:13px">Помилка. Спробуйте ще раз.</div>';
+  }
+}
+
+async function analyzeLRForArticle() {
+  const text = document.getElementById('lrTextForArticle').value.trim();
+  if (!text) return;
+  state.lrText = text;
+  const el = document.getElementById('lrArticleAngles');
+  el.innerHTML = '<div style="color:#999;font-style:italic;font-size:13px;padding:8px 0"><span class="spinner"></span>Аналізую лонгрід...</div>';
+  showStep('stepArticleLRAngles');
+
+  const prompt = `Read this article and suggest 4 ways to repurpose it for Igor Kovalenko (new article, newsletter issue, or condensed version). Return ONLY valid JSON array: [{"title":"...","type":"article|newsletter|condensed","desc":"..."},...]\n\nArticle:\n${text.slice(0, 3000)}`;
+
+  try {
+    const result = await callAPI(IGOR_SYSTEM, prompt);
+    let angles;
+    try { angles = JSON.parse(result.replace(/```json|```/g, '').trim()); } catch(e) { angles = []; }
+    el.innerHTML = '';
+    if (!angles.length) { el.innerHTML = '<div style="color:#999;font-size:13px">Не вдалось проаналізувати. Спробуйте ще раз.</div>'; return; }
+    const typeLabels = { article: '📄 Нова стаття', newsletter: '📬 Розсилка', condensed: '✂️ Скорочена версія' };
+    angles.forEach(a => {
+      const div = document.createElement('div');
+      div.className = 'angle-item';
+      div.innerHTML = `<div class="angle-title">${a.title}</div><div class="angle-desc">${a.desc}</div><div class="angle-type">→ ${typeLabels[a.type] || a.type}</div>`;
+      div.onclick = () => {
+        document.getElementById('bcOutput').innerHTML = `Стаття з лонгріду → <span>${a.title}</span>`;
+        state.backStep = 'stepArticleLRAngles';
+        state.lastSystem = IGOR_SYSTEM;
+        const typePrompts = {
+          article: `Write a new article outline based on the source, angle: "${a.title}". Conversational headings, 5-7 sections with 2-3 sentence descriptions. Target 1500-2000 words. Output only the outline.`,
+          newsletter: `Write a newsletter issue outline based on the source, angle: "${a.title}". Include: subject line, preview text, opening hook, 3-4 sections, closing. 600-800 words. Output only the outline.`,
+          condensed: `Write a condensed version of this article, angle: "${a.title}". 400-600 words. Keep most concrete examples and practical takeaways. Output only the text.`
+        };
+        state.lastPrompt = `${typePrompts[a.type] || typePrompts.article}\n\nSource article:\n${text.slice(0, 2500)}`;
+        showStep('stepOutput');
+        generate();
+      };
+      el.appendChild(div);
+    });
+  } catch(e) {
+    el.innerHTML = '<div style="color:#999;font-size:13px">Помилка. Спробуйте ще раз.</div>';
+  }
+}
+
+async function callAPI(system, prompt) {
+  const response = await fetch(WEBHOOK_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ system, prompt })
+  });
+  const text = await response.text();
+  // Strip Make's wrapping {{ }} if present
+  return text.replace(/^\{\{/, '').replace(/\}\}$/, '').trim();
+}
+
+async function generate() {
+  const el = document.getElementById('outputText');
+  el.className = 'output-text loading';
+  el.innerHTML = '<span class="spinner"></span>Генерую...';
+  try {
+    const result = await callAPI(state.lastSystem, state.lastPrompt);
+    el.className = 'output-text';
+    el.textContent = result;
+  } catch(e) {
+    el.className = 'output-text';
+    el.textContent = 'Помилка зʼєднання. Спробуйте ще раз.';
+  }
+}
+
+function regenerate() { generate(); }
+
+function copyOutput() {
+  const text = document.getElementById('outputText').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = 'Скопійовано ✓';
+    btn.style.background = '#2d7a4f';
+    setTimeout(() => { btn.textContent = 'Скопіювати'; btn.style.background = ''; }, 2500);
+  });
+}
+
+function goBackFromOutput() { showStep(state.backStep || 'step1'); }
+
+function showStep(id) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+</script>
+</body>
+</html>
